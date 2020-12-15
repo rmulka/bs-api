@@ -1,0 +1,12 @@
+package com.rmulka.bs.request
+
+import com.rmulka.bs.domain.PlayerDomain
+import javax.validation.constraints.NotBlank
+
+data class PlayerRequest(
+
+        @NotBlank(message = "Missing name")
+        val name: String
+) {
+    fun toPlayerDomain(): PlayerDomain = PlayerDomain(name)
+}

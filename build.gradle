@@ -1,104 +1,82 @@
 plugins {
-	id("org.springframework.boot") version "$springbootVersion"
-	id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
-    id "org.jetbrains.kotlin.plugin.spring" version "$kotlinVersion"
-    id 'nu.studer.jooq' version '5.2'
-    id "com.avast.gradle.docker-compose" version "0.13.4"
-    id "org.flywaydb.flyway" version "$flywayVersion"
-    id "java-library"
 }
 
 group = "com.rmulka"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
 
-apply plugin: "docker-compose"
-apply plugin: 'java'
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
 	mavenCentral()
 	maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-actuator:${springbootVersion}"
-    implementation("org.springframework.boot:spring-boot-starter-jooq:$springbootVersion")
-	implementation("org.springframework.boot:spring-boot-starter-webflux:$springbootVersion")
-	implementation("org.springframework.boot:spring-boot-starter-websocket:$springbootVersion")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-	implementation("com.wavefront:wavefront-spring-boot-starter:$wavefrontVersion")
-	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:$reactorVersion")
-	implementation("org.flywaydb:flyway-core:$flywayVersion")
-	implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
-    implementation "org.postgresql:postgresql:$postgresDriverVersion"
-    implementation "org.jooq:jooq:$jooqVersion"
-    implementation("io.github.microutils:kotlin-logging:$loggerVersion")
+subprojects { project ->
+    apply plugin: "kotlin"
+    apply plugin: "org.jetbrains.kotlin.jvm"
 
-    jooqGenerator "org.postgresql:postgresql:$postgresDriverVersion"
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://repo.spring.io/snapshot") }
+    }
 
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("io.projectreactor:reactor-test")
-}
-
-ext['jooq.version'] = jooq.version.get()
-
-dependencyManagement {
-	imports {
-        mavenBom "com.wavefront:wavefront-spring-boot-bom:$wavefrontVersion"
-	}
-}
-
-dockerCompose {
-    noRecreate = true
-    projectName = "bs"
-    removeOrphans = true
-}
-
-jooq {
-    configurations {
-        main {
-            generateSchemaSourceOnCompilation = false
-            generationTool {
-                jdbc {
-                    driver = 'org.postgresql.Driver'
-                    url = 'jdbc:postgresql://localhost:5433/bs'
-                    username = 'user'
-                    password = 'pass'
-                }
-                generator {
-                    database {
-                        name = 'org.jooq.meta.postgres.PostgresDatabase'
-                        inputSchema = 'bs'
-                    }
-                    generate {
-                        relations = true
-                        deprecated = false
-                        records = true
-                        pojos = true
-                        pojosEqualsAndHashCode = true
-                        daos = true
-                        fluentSetters = true
-                        javaTimeTypes = true
-                    }
-                    target {
-                        packageName = 'com.rmulka.bs.jooq.generated'
-                        directory = 'src/main/java/'
-                    }
-                }
-            }
-        }
+    dependencies {
+        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+        implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:$reactorVersion")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
     }
 }
 
-flyway {
-    url = 'jdbc:postgresql://localhost:5433/bs'
-    user = 'user'
-    password = 'pass'
-    locations = ['classpath:db/migration']
-}
+//dockerCompose {
+//    noRecreate = true
+//    projectName = "bs"
+//    removeOrphans = true
+//}
+
+//jooq {
+//    configurations {
+//        main {
+//            generateSchemaSourceOnCompilation = false
+//            generationTool {
+//                jdbc {
+//                    driver = 'org.postgresql.Driver'
+//                    url = 'jdbc:postgresql://localhost:5433/bs'
+//                    username = 'user'
+//                    password = 'pass'
+//                }
+//                generator {
+//                    database {
+//                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+//                        inputSchema = 'bs'
+//                    }
+//                    generate {
+//                        relations = true
+//                        deprecated = false
+//                        records = true
+//                        pojos = true
+//                        pojosEqualsAndHashCode = true
+//                        daos = true
+//                        fluentSetters = true
+//                        javaTimeTypes = true
+//                    }
+//                    target {
+//                        packageName = 'com.rmulka.bs.jooq.generated'
+//                        directory = 'src/main/java/'
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//flyway {
+//    url = 'jdbc:postgresql://localhost:5433/bs'
+//    user = 'user'
+//    password = 'pass'
+//    locations = ['classpath:db/migration']
+//}
 
 sourceCompatibility = 11
 compileKotlin {
@@ -113,9 +91,6 @@ test {
 	useJUnitPlatform()
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
-
-project.tasks.getByName('generateJooq').dependsOn composeUp
-project.tasks.getByName('generateJooq').dependsOn flywayMigrate
-project.tasks.getByName('generateJooq').finalizedBy composeDownForced
+//project.tasks.getByName('generateJooq').dependsOn composeUp
+//project.tasks.getByName('generateJooq').dependsOn flywayMigrate
+//project.tasks.getByName('generateJooq').finalizedBy composeDownForced
