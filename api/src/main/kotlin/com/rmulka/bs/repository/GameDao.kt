@@ -15,11 +15,15 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
     suspend fun getNumPlayersInGame(gameId: UUID): Int = dslContext
             .select(Tables.GAME.NUM_PLAYERS)
             .from(Tables.GAME)
+            .where(Tables.GAME.ID.eq(gameId))
             .fetchOneInto(Int::class.java) ?: throw ResourceNotFoundException("Game id $gameId does not exist")
 
     suspend fun fetchAllGames(): List<Game> = dslContext
             .selectFrom(Tables.GAME)
             .fetchInto(Game::class.java)
+
+    suspend fun fetchGame(id: UUID): Game =
+            this.fetchOneById(id)
 
     suspend fun addPlayer(gameId: UUID) {
         this.fetchOneById(gameId)?.let {
