@@ -4,7 +4,9 @@
 package com.rmulka.bs.jooq.generated;
 
 
+import com.rmulka.bs.jooq.generated.tables.Game;
 import com.rmulka.bs.jooq.generated.tables.Player;
+import com.rmulka.bs.jooq.generated.tables.PlayerGame;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +22,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Bs extends SchemaImpl {
 
-    private static final long serialVersionUID = -588200186;
+    private static final long serialVersionUID = -930657926;
 
     /**
      * The reference instance of <code>bs</code>
@@ -28,9 +30,19 @@ public class Bs extends SchemaImpl {
     public static final Bs BS = new Bs();
 
     /**
+     * The table <code>bs.game</code>.
+     */
+    public final Game GAME = Game.GAME;
+
+    /**
      * The table <code>bs.player</code>.
      */
     public final Player PLAYER = Player.PLAYER;
+
+    /**
+     * The table <code>bs.player_game</code>.
+     */
+    public final PlayerGame PLAYER_GAME = PlayerGame.PLAYER_GAME;
 
     /**
      * No further instances allowed
@@ -48,6 +60,8 @@ public class Bs extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
-            Player.PLAYER);
+            Game.GAME,
+            Player.PLAYER,
+            PlayerGame.PLAYER_GAME);
     }
 }

@@ -34,7 +34,7 @@ dependencies {
 
     implementation "javax.validation:validation-api:2.0.1.Final"
 
-    implementation 'com.zaxxer:HikariCP:3.4.5'
+//    implementation 'com.zaxxer:HikariCP:3.4.5'
     implementation "org.postgresql:postgresql:$postgresDriverVersion"
 
     implementation "org.jooq:jooq:$jooqVersion"

@@ -4,7 +4,9 @@
 package com.rmulka.bs.jooq.generated;
 
 
+import com.rmulka.bs.jooq.generated.tables.Game;
 import com.rmulka.bs.jooq.generated.tables.Player;
+import com.rmulka.bs.jooq.generated.tables.PlayerGame;
 
 
 /**
@@ -14,7 +16,17 @@ import com.rmulka.bs.jooq.generated.tables.Player;
 public class Tables {
 
     /**
+     * The table <code>bs.game</code>.
+     */
+    public static final Game GAME = Game.GAME;
+
+    /**
      * The table <code>bs.player</code>.
      */
     public static final Player PLAYER = Player.PLAYER;
+
+    /**
+     * The table <code>bs.player_game</code>.
+     */
+    public static final PlayerGame PLAYER_GAME = PlayerGame.PLAYER_GAME;
 }

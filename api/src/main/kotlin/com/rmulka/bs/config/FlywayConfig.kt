@@ -7,7 +7,7 @@ import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
 @Configuration("flyway")
-class FlywayConfig(@Qualifier("dataSource") private val dataSource: DataSource) {
+class FlywayConfig(private val dataSource: DataSource) {
 
     @PostConstruct
     fun runFlyway() {

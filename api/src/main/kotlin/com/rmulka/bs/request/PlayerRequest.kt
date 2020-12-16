@@ -8,5 +8,5 @@ data class PlayerRequest(
         @NotBlank(message = "Missing name")
         val name: String
 ) {
-    fun toPlayerDomain(): PlayerDomain = PlayerDomain(name)
+    fun toPlayerDomain(): PlayerDomain = PlayerDomain(id=null, name=name)
 }

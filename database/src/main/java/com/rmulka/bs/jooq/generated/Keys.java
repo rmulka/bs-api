@@ -4,9 +4,14 @@
 package com.rmulka.bs.jooq.generated;
 
 
+import com.rmulka.bs.jooq.generated.tables.Game;
 import com.rmulka.bs.jooq.generated.tables.Player;
+import com.rmulka.bs.jooq.generated.tables.PlayerGame;
+import com.rmulka.bs.jooq.generated.tables.records.GameRecord;
+import com.rmulka.bs.jooq.generated.tables.records.PlayerGameRecord;
 import com.rmulka.bs.jooq.generated.tables.records.PlayerRecord;
 
+import org.jooq.ForeignKey;
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
@@ -28,18 +33,29 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<GameRecord> GAME_PKEY = UniqueKeys0.GAME_PKEY;
     public static final UniqueKey<PlayerRecord> PLAYER_PKEY = UniqueKeys0.PLAYER_PKEY;
+    public static final UniqueKey<PlayerGameRecord> PLAYER_GAME_PKEY = UniqueKeys0.PLAYER_GAME_PKEY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<PlayerGameRecord, PlayerRecord> PLAYER_GAME__PLAYER_GAME_PLAYER_ID_FKEY = ForeignKeys0.PLAYER_GAME__PLAYER_GAME_PLAYER_ID_FKEY;
+    public static final ForeignKey<PlayerGameRecord, GameRecord> PLAYER_GAME__PLAYER_GAME_GAME_ID_FKEY = ForeignKeys0.PLAYER_GAME__PLAYER_GAME_GAME_ID_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 {
+        public static final UniqueKey<GameRecord> GAME_PKEY = Internal.createUniqueKey(Game.GAME, "game_pkey", new TableField[] { Game.GAME.ID }, true);
         public static final UniqueKey<PlayerRecord> PLAYER_PKEY = Internal.createUniqueKey(Player.PLAYER, "player_pkey", new TableField[] { Player.PLAYER.ID }, true);
+        public static final UniqueKey<PlayerGameRecord> PLAYER_GAME_PKEY = Internal.createUniqueKey(PlayerGame.PLAYER_GAME, "player_game_pkey", new TableField[] { PlayerGame.PLAYER_GAME.ID }, true);
+    }
+
+    private static class ForeignKeys0 {
+        public static final ForeignKey<PlayerGameRecord, PlayerRecord> PLAYER_GAME__PLAYER_GAME_PLAYER_ID_FKEY = Internal.createForeignKey(Keys.PLAYER_PKEY, PlayerGame.PLAYER_GAME, "player_game_player_id_fkey", new TableField[] { PlayerGame.PLAYER_GAME.PLAYER_ID }, true);
+        public static final ForeignKey<PlayerGameRecord, GameRecord> PLAYER_GAME__PLAYER_GAME_GAME_ID_FKEY = Internal.createForeignKey(Keys.GAME_PKEY, PlayerGame.PLAYER_GAME, "player_game_game_id_fkey", new TableField[] { PlayerGame.PLAYER_GAME.GAME_ID }, true);
     }
 }

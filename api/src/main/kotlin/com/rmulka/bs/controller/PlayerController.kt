@@ -17,6 +17,6 @@ class PlayerController(private val playerService: PlayerService) {
 
     @PostMapping
     suspend fun createPlayer(@RequestBody @Valid playerRequest: PlayerRequest): ResponseEntity<PlayerResponse> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(playerService.createPlayer(playerRequest))
+        return ResponseEntity.status(HttpStatus.CREATED).body(playerService.createPlayer(playerRequest.toPlayerDomain()))
     }
 }
