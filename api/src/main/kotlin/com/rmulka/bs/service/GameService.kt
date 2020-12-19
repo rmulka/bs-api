@@ -10,6 +10,7 @@ import com.rmulka.bs.repository.PlayerDao
 import com.rmulka.bs.repository.PlayerGameDao
 import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.response.DetailGameResponse
+import com.rmulka.bs.response.PlayerGameResponse
 import com.rmulka.bs.util.toGameResponse
 import mu.KotlinLogging
 import org.jooq.JSONB
@@ -51,6 +52,15 @@ class GameService(private val gameDao: GameDao,
             } ?: throw ResourceNotFoundException("Player id $userId not found")
 
     suspend fun fetchAllGames(): List<GameResponse> = gameDao.fetchAllGames().toGameResponse()
+
+    @Transactional
+    suspend fun leaveGame(playerGameDomain: PlayerGameDomain): PlayerGameResponse =
+        playerGameDao.fetchByPlayerId(playerGameDomain.playerId).let { playerGame ->
+            playerGameDao.leaveGame(playerGameDomain.playerId)
+            logger.info("Player ${playerGameDomain.playerId} left game ${playerGameDomain.gameId}...soft deleting")
+            gameDao.deleteGame(playerGameDomain.gameId)
+            PlayerGameResponse("${playerGame.gameId}")
+        }
 
     private fun generateGameJson(): JSONB =
             JSONB.jsonb(objectMapper.writeValueAsString(GameDetails()))

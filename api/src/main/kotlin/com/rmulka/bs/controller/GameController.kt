@@ -8,6 +8,7 @@ import com.rmulka.bs.service.GameService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -29,7 +30,7 @@ class GameController(private val gameService: GameService) {
 
     @GetMapping("/{game_id}")
     suspend fun getGameDetails(@PathVariable("game_id") gameId: UUID): ResponseEntity<DetailGameResponse> =
-            ResponseEntity.ok(gameService.fetchGame(gameId))
+            gameService.fetchGame(gameId).let { ResponseEntity.ok(it) }
 
     @PostMapping
     suspend fun createGame(@RequestHeader("user_id") @NotBlank userId: UUID): ResponseEntity<UUID> =
@@ -41,4 +42,8 @@ class GameController(private val gameService: GameService) {
                 true -> ResponseEntity.ok(PlayerGameResponse())
                 else -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(PlayerGameResponse("Game ${playerGameRequest.game_id} is full"))
             }
+
+    @DeleteMapping("/players")
+    suspend fun leaveGame(@RequestBody playerGameRequest: PlayerGameRequest): ResponseEntity<PlayerGameResponse> =
+            gameService.leaveGame(playerGameRequest.toPlayerGameDomain()).let { ResponseEntity.ok(it) }
 }

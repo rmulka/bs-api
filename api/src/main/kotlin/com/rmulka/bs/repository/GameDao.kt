@@ -21,6 +21,7 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
 
     suspend fun fetchAllGames(): List<Game> = dslContext
             .selectFrom(Tables.GAME)
+            .where(Tables.GAME.NUM_PLAYERS.greaterThan(0).and(Tables.GAME.IS_ACTIVE.eq(true)))
             .fetchInto(Game::class.java)
 
     suspend fun fetchGame(id: UUID): Game =
@@ -42,9 +43,18 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
                 0,
                 userName,
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                true
         ).let {
             this.insert(it)
             it.id
         }
+
+    suspend fun deleteGame(gameId: UUID) {
+        this.fetchOneById(gameId)?.let {
+            it.isActive = false
+            it.updatedAt = LocalDateTime.now()
+            this.update(it)
+        } ?: throw ResourceNotFoundException("Game id $gameId does not exist")
+    }
 }
