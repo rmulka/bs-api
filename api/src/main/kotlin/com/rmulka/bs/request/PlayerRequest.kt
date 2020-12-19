@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank
 
 data class PlayerRequest(
 
-        @NotBlank(message = "Missing name")
+        @field:NotBlank(message = "Missing name")
         val name: String
 ) {
     fun toPlayerDomain(): PlayerDomain = PlayerDomain(id=null, name=name)

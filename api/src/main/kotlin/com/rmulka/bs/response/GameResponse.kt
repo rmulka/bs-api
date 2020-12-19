@@ -1,4 +1,4 @@
-package com.rmulka.bs.request
+package com.rmulka.bs.response
 
 import java.util.UUID
 

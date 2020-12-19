@@ -28,6 +28,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator:${springbootVersion}"
     implementation("org.springframework.boot:spring-boot-starter-webflux:$springbootVersion")
     implementation("org.springframework.boot:spring-boot-starter-jdbc:$springbootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-validation:$springbootVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.wavefront:wavefront-spring-boot-starter:$wavefrontVersion")
     implementation("io.github.microutils:kotlin-logging:$loggerVersion")
