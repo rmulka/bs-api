@@ -1,0 +1,1 @@
+ALTER TABLE bs.game ADD COLUMN creator_name TEXT NOT NULL DEFAULT '';

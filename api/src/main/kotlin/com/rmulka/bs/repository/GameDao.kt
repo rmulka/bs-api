@@ -7,6 +7,7 @@ import com.rmulka.bs.jooq.generated.tables.daos.GameDao
 import org.jooq.DSLContext
 import org.jooq.JSONB
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -28,16 +29,20 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
     suspend fun addPlayer(gameId: UUID) {
         this.fetchOneById(gameId)?.let {
             it.numPlayers++
+            it.updatedAt = LocalDateTime.now()
             this.update(it)
         } ?: throw ResourceNotFoundException("Game id $gameId does not exist")
     }
 
-    suspend fun createGame(gameJson: JSONB): UUID =
+    suspend fun createGame(userName: String, gameJson: JSONB): UUID =
         Game(
                 UUID.randomUUID(),
                 false,
                 gameJson,
-                0
+                0,
+                userName,
+                LocalDateTime.now(),
+                LocalDateTime.now()
         ).let {
             this.insert(it)
             it.id

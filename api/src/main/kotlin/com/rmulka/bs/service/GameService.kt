@@ -3,8 +3,10 @@ package com.rmulka.bs.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rmulka.bs.domain.GameDetails
 import com.rmulka.bs.domain.PlayerGameDomain
+import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.jooq.generated.tables.pojos.Game
 import com.rmulka.bs.repository.GameDao
+import com.rmulka.bs.repository.PlayerDao
 import com.rmulka.bs.repository.PlayerGameDao
 import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.response.DetailGameResponse
@@ -17,6 +19,7 @@ import java.util.UUID
 
 @Service
 class GameService(private val gameDao: GameDao,
+                  private val playerDao: PlayerDao,
                   private val playerGameDao: PlayerGameDao,
                   private val objectMapper: ObjectMapper) {
 
@@ -40,9 +43,12 @@ class GameService(private val gameDao: GameDao,
     suspend fun fetchGame(gameId: UUID): DetailGameResponse =
             toDetailGameResponse(gameDao.fetchGame(gameId))
 
-    suspend fun createGame(): UUID = gameDao.createGame(generateGameJson()).also {
-        logger.info("Game $it has been created")
-    }
+    suspend fun createGame(userId: UUID): UUID =
+            playerDao.fetchOneById(userId)?.let { player ->
+                gameDao.createGame(player.playerName, generateGameJson()).also { gameId ->
+                    logger.info("Game $gameId has been created by user $userId")
+                }
+            } ?: throw ResourceNotFoundException("Player id $userId not found")
 
     suspend fun fetchAllGames(): List<GameResponse> = gameDao.fetchAllGames().toGameResponse()
 

@@ -6,6 +6,7 @@ import com.rmulka.bs.repository.PlayerDao
 import com.rmulka.bs.response.PlayerResponse
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -16,7 +17,12 @@ class PlayerService(private val playerDao: PlayerDao) {
     }
 
     suspend fun createPlayer(playerDomain: PlayerDomain): PlayerResponse =
-            Player(UUID.randomUUID(), playerDomain.name).let { player ->
+            Player(
+                    UUID.randomUUID(),
+                    playerDomain.name,
+                    LocalDateTime.now(),
+                    LocalDateTime.now()
+            ).let { player ->
                 logger.info("Creating player with id ${player.id} and name ${player.playerName}")
                 playerDao.insert(player)
                 PlayerResponse(player)

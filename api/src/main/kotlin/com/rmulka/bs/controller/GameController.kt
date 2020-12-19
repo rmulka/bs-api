@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import javax.validation.constraints.NotBlank
 
 @RestController
 @RequestMapping("/games")
@@ -30,8 +32,8 @@ class GameController(private val gameService: GameService) {
             ResponseEntity.ok(gameService.fetchGame(gameId))
 
     @PostMapping
-    suspend fun createGame(): ResponseEntity<UUID> =
-        gameService.createGame().let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
+    suspend fun createGame(@RequestHeader("user_id") @NotBlank userId: UUID): ResponseEntity<UUID> =
+        gameService.createGame(userId).let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
 
     @PostMapping("/players")
     suspend fun joinGame(@RequestBody playerGameRequest: PlayerGameRequest): ResponseEntity<PlayerGameResponse> =
