@@ -4,6 +4,7 @@ import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.jooq.generated.Tables
 import com.rmulka.bs.jooq.generated.tables.pojos.Game
 import com.rmulka.bs.jooq.generated.tables.daos.GameDao
+import com.rmulka.bs.jooq.generated.tables.pojos.Player
 import org.jooq.DSLContext
 import org.jooq.JSONB
 import org.springframework.stereotype.Repository
@@ -25,7 +26,7 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
             .fetchInto(Game::class.java)
 
     suspend fun fetchGame(id: UUID): Game =
-            this.fetchOneById(id)
+            this.fetchOneById(id) ?: throw ResourceNotFoundException("Game $id not found")
 
     suspend fun addPlayer(gameId: UUID) {
         this.fetchOneById(gameId)?.let {
@@ -35,16 +36,25 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
         } ?: throw ResourceNotFoundException("Game id $gameId does not exist")
     }
 
-    suspend fun createGame(userName: String, gameJson: JSONB): UUID =
+    suspend fun removePlayer(gameId: UUID) {
+        this.fetchOneById(gameId)?.let {
+            it.numPlayers--
+            it.updatedAt = LocalDateTime.now()
+            this.update(it)
+        } ?: throw ResourceNotFoundException("Game id $gameId does not exist")
+    }
+
+    suspend fun createGame(player: Player, gameJson: JSONB): UUID =
         Game(
                 UUID.randomUUID(),
                 false,
                 gameJson,
                 0,
-                userName,
+                player.playerName,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
-                true
+                true,
+                player.id
         ).let {
             this.insert(it)
             it.id

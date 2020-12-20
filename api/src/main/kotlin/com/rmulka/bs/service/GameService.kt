@@ -30,14 +30,20 @@ class GameService(private val gameDao: GameDao,
 
     @Transactional
     suspend fun joinGame(playerGameDomain: PlayerGameDomain): Boolean =
-        gameDao.getNumPlayersInGame(playerGameDomain.gameId).let { numPlayers ->
-            if (numPlayers >= 8) false.also {
-                logger.info("Player ${playerGameDomain.playerId} attempted to join full game ${playerGameDomain.gameId}")
-            } else {
-                playerGameDao.joinGame(playerGameDomain, numPlayers == 0)
-                gameDao.addPlayer(playerGameDomain.gameId)
-                logger.info("Player ${playerGameDomain.playerId} joined game ${playerGameDomain.gameId}")
-                true
+        gameDao.fetchGame(playerGameDomain.gameId).let { game ->
+            when {
+                game.numPlayers >= 8 -> false.also {
+                    logger.info("Player ${playerGameDomain.playerId} attempted to join full game ${playerGameDomain.gameId}")
+                }
+                !game.isActive -> false.also {
+                    logger.info("Player ${playerGameDomain.playerId} attempted to join inactive game ${playerGameDomain.gameId}")
+                }
+                else -> true.also {
+                    playerGameDao.joinGame(playerGameDomain, game.numPlayers == 0)
+                    gameDao.addPlayer(playerGameDomain.gameId)
+                    logger.info("Player ${playerGameDomain.playerId} joined game ${playerGameDomain.gameId}" +
+                            if (game.numPlayers == 0) " as game creator" else "")
+                }
             }
         }
 
@@ -46,7 +52,7 @@ class GameService(private val gameDao: GameDao,
 
     suspend fun createGame(userId: UUID): UUID =
             playerDao.fetchOneById(userId)?.let { player ->
-                gameDao.createGame(player.playerName, generateGameJson()).also { gameId ->
+                gameDao.createGame(player, generateGameJson()).also { gameId ->
                     logger.info("Game $gameId has been created by user $userId")
                 }
             } ?: throw ResourceNotFoundException("Player id $userId not found")
@@ -57,8 +63,25 @@ class GameService(private val gameDao: GameDao,
     suspend fun leaveGame(playerGameDomain: PlayerGameDomain): PlayerGameResponse =
         playerGameDao.fetchByPlayerId(playerGameDomain.playerId).let { playerGame ->
             playerGameDao.leaveGame(playerGameDomain.playerId)
-            logger.info("Player ${playerGameDomain.playerId} left game ${playerGameDomain.gameId}...soft deleting")
-            gameDao.deleteGame(playerGameDomain.gameId)
+            gameDao.fetchGame(playerGameDomain.gameId).let { game ->
+                when {
+                    game.inProgress -> {
+                        logger.info("Game ${game.id} was in progress when player ${playerGameDomain.playerId} left...soft deleting")
+                        gameDao.deleteGame(playerGameDomain.gameId)
+                        playerGameDao.deletePlayerGame(game.id)
+                    }
+                    game.numPlayers == 1 || game.creatorId == playerGameDomain.playerId -> {
+                        logger.info("Player ${playerGameDomain.playerId} was game creator or last player in game ${game.id}...soft deleting")
+                        gameDao.deleteGame(playerGameDomain.gameId)
+                        playerGameDao.deletePlayerGame(game.id)
+                    }
+                    else -> {
+                        gameDao.removePlayer(game.id)
+                        playerGameDao.removePlayer(playerGameDomain.playerId)
+                        logger.info("Player ${playerGameDomain.playerId} left game ${game.id}. Remaining players: ${game.numPlayers - 1}")
+                    }
+                }
+            }
             PlayerGameResponse("${playerGame.gameId}")
         }
 

@@ -21,12 +21,30 @@ class PlayerGameDao(private val dslContext: DSLContext) : PlayerGameDao(dslConte
         ))
     }
 
-    suspend fun fetchByPlayerId(playerId: UUID): PlayerGame =
-            this.fetchOne(Tables.PLAYER_GAME.PLAYER_ID, playerId)
-                    ?: throw ResourceNotFoundException("Player $playerId was not found")
+    suspend fun fetchByPlayerId(playerId: UUID): PlayerGame = dslContext
+            .select(*Tables.PLAYER_GAME.fields())
+            .from(Tables.PLAYER_GAME)
+            .innerJoin(Tables.GAME).on(Tables.PLAYER_GAME.GAME_ID.eq(Tables.GAME.ID).and(Tables.GAME.IS_ACTIVE.eq(true)))
+            .where(Tables.PLAYER_GAME.PLAYER_ID.eq(playerId))
+            .fetchOneInto(PlayerGame::class.java)
+            ?: throw ResourceNotFoundException("Player $playerId was not found")
 
     suspend fun leaveGame(playerId: UUID) = dslContext
             .deleteFrom(Tables.PLAYER_GAME)
             .where(Tables.PLAYER_GAME.PLAYER_ID.eq(playerId))
             .execute()
+
+    suspend fun deletePlayerGame(gameId: UUID) {
+        dslContext
+                .deleteFrom(Tables.PLAYER_GAME)
+                .where(Tables.PLAYER_GAME.GAME_ID.eq(gameId))
+                .execute()
+    }
+
+    suspend fun removePlayer(playerId: UUID) {
+        dslContext
+                .deleteFrom(Tables.PLAYER_GAME)
+                .where(Tables.PLAYER_GAME.PLAYER_ID.eq(playerId))
+                .execute()
+    }
 }

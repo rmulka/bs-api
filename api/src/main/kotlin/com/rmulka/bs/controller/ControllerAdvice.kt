@@ -18,7 +18,7 @@ class ControllerAdvice {
 
     @ExceptionHandler(ResourceNotFoundException::class)
     suspend fun handleResourceNotFoundException(ex: ResourceNotFoundException, request: ServerWebExchange): ResponseEntity<ErrorResponse> {
-        logger.error("Request to ${request.request.uri} with body threw ResourceNotFoundException")
+        logger.error("Request to ${request.request.uri} threw ResourceNotFoundException: ${ex.message}")
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
     }
 }
