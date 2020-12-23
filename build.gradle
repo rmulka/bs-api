@@ -1,11 +1,14 @@
 plugins {
     id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
+    id "com.avast.gradle.docker-compose" version "0.13.4"
 }
 
 group = "com.rmulka"
 version = "0.0.1-SNAPSHOT"
 
 java.sourceCompatibility = JavaVersion.VERSION_11
+
+apply plugin: "docker-compose"
 
 repositories {
 	mavenCentral()
@@ -29,54 +32,11 @@ subprojects { project ->
     }
 }
 
-//dockerCompose {
-//    noRecreate = true
-//    projectName = "bs"
-//    removeOrphans = true
-//}
-
-//jooq {
-//    configurations {
-//        main {
-//            generateSchemaSourceOnCompilation = false
-//            generationTool {
-//                jdbc {
-//                    driver = 'org.postgresql.Driver'
-//                    url = 'jdbc:postgresql://localhost:5433/bs'
-//                    username = 'user'
-//                    password = 'pass'
-//                }
-//                generator {
-//                    database {
-//                        name = 'org.jooq.meta.postgres.PostgresDatabase'
-//                        inputSchema = 'bs'
-//                    }
-//                    generate {
-//                        relations = true
-//                        deprecated = false
-//                        records = true
-//                        pojos = true
-//                        pojosEqualsAndHashCode = true
-//                        daos = true
-//                        fluentSetters = true
-//                        javaTimeTypes = true
-//                    }
-//                    target {
-//                        packageName = 'com.rmulka.bs.jooq.generated'
-//                        directory = 'src/main/java/'
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//flyway {
-//    url = 'jdbc:postgresql://localhost:5433/bs'
-//    user = 'user'
-//    password = 'pass'
-//    locations = ['classpath:db/migration']
-//}
+dockerCompose {
+    noRecreate = true
+    projectName = "bs"
+    removeOrphans = true
+}
 
 sourceCompatibility = 11
 compileKotlin {

@@ -2,8 +2,6 @@ plugins {
     id("org.springframework.boot") version "$springbootVersion"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id "org.jetbrains.kotlin.plugin.spring" version "$kotlinVersion"
-    id "com.avast.gradle.docker-compose" version "0.13.4"
-    id "org.flywaydb.flyway" version "$flywayVersion"
     id 'application'
 }
 
@@ -12,7 +10,6 @@ version = "0.0.1-SNAPSHOT"
 
 java.sourceCompatibility = JavaVersion.VERSION_11
 
-apply plugin: "docker-compose"
 apply plugin: "application"
 
 mainClassName = "com.rmulka.bs.WebSocketApplicationKt"
@@ -24,6 +21,7 @@ repositories {
 
 dependencies {
     implementation project(":database")
+    implementation project(":domain")
 
     implementation "org.springframework.boot:spring-boot-starter-actuator:${springbootVersion}"
     implementation("org.springframework.boot:spring-boot-starter-jooq:$springbootVersion")
@@ -35,6 +33,8 @@ dependencies {
 
     implementation "org.postgresql:postgresql:$postgresDriverVersion"
 
+    implementation "org.jooq:jooq:$jooqVersion"
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
@@ -42,19 +42,6 @@ dependencyManagement {
     imports {
         mavenBom "com.wavefront:wavefront-spring-boot-bom:$wavefrontVersion"
     }
-}
-
-dockerCompose {
-    noRecreate = true
-    projectName = "bs"
-    removeOrphans = true
-}
-
-flyway {
-    url = 'jdbc:postgresql://localhost:5433/bs'
-    user = 'user'
-    password = 'pass'
-    locations = ['classpath:db/migration']
 }
 
 compileKotlin {

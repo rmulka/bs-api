@@ -4,6 +4,7 @@ import com.rmulka.bs.domain.PlayerGameDomain
 import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.jooq.generated.Tables
 import com.rmulka.bs.jooq.generated.tables.daos.PlayerGameDao
+import com.rmulka.bs.jooq.generated.tables.pojos.Game
 import com.rmulka.bs.jooq.generated.tables.pojos.PlayerGame
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
@@ -41,10 +42,11 @@ class PlayerGameDao(private val dslContext: DSLContext) : PlayerGameDao(dslConte
                 .execute()
     }
 
-    suspend fun removePlayer(playerId: UUID) {
-        dslContext
-                .deleteFrom(Tables.PLAYER_GAME)
-                .where(Tables.PLAYER_GAME.PLAYER_ID.eq(playerId))
-                .execute()
-    }
+    suspend fun fetchGameByPlayerId(playerId: UUID): Game = dslContext
+            .select(*Tables.GAME.fields())
+            .from(Tables.PLAYER_GAME)
+            .innerJoin(Tables.GAME).on(Tables.PLAYER_GAME.GAME_ID.eq(Tables.GAME.ID).and(Tables.GAME.IS_ACTIVE.eq(true)))
+            .where(Tables.PLAYER_GAME.PLAYER_ID.eq(playerId))
+            .fetchOneInto(Game::class.java)
+            ?: throw ResourceNotFoundException("Player $playerId not in a game")
 }

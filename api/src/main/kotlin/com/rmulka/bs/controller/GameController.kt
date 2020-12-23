@@ -1,8 +1,8 @@
 package com.rmulka.bs.controller
 
-import com.rmulka.bs.response.GameResponse
+import com.rmulka.bs.domain.Game
+import com.rmulka.bs.response.BasicGameResponse
 import com.rmulka.bs.request.PlayerGameRequest
-import com.rmulka.bs.response.DetailGameResponse
 import com.rmulka.bs.response.PlayerGameResponse
 import com.rmulka.bs.service.GameService
 import org.springframework.http.HttpStatus
@@ -25,11 +25,11 @@ import javax.validation.constraints.NotBlank
 class GameController(private val gameService: GameService) {
 
     @GetMapping
-    suspend fun getAllGames(): ResponseEntity<List<GameResponse>> =
+    suspend fun getAllGames(): ResponseEntity<List<BasicGameResponse>> =
             ResponseEntity.ok(gameService.fetchAllGames())
 
     @GetMapping("/{game_id}")
-    suspend fun getGameDetails(@PathVariable("game_id") gameId: UUID): ResponseEntity<DetailGameResponse> =
+    suspend fun getGameDetails(@PathVariable("game_id") gameId: UUID): ResponseEntity<Game> =
             gameService.fetchGame(gameId).let { ResponseEntity.ok(it) }
 
     @PostMapping
