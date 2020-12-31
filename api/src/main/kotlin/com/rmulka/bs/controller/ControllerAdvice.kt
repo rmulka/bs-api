@@ -3,6 +3,7 @@ package com.rmulka.bs.controller
 import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.response.ErrorResponse
 import mu.KotlinLogging
+import org.jooq.exception.DataChangedException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -21,4 +22,10 @@ class ControllerAdvice {
         logger.error("Request to ${request.request.uri} threw ResourceNotFoundException: ${ex.message}")
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
     }
+
+    @ExceptionHandler(DataChangedException::class)
+    suspend fun handleDataChangedException(
+            ex: DataChangedException,
+            request: ServerWebExchange
+    ): ResponseEntity<String> = ResponseEntity(ex.localizedMessage, HttpStatus.CONFLICT)
 }

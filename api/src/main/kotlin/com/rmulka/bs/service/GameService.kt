@@ -9,8 +9,10 @@ import com.rmulka.bs.repository.GameDao
 import com.rmulka.bs.repository.PlayerDao
 import com.rmulka.bs.repository.PlayerGameDao
 import com.rmulka.bs.response.BasicGameResponse
+import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.response.PlayerGameResponse
 import com.rmulka.bs.util.ConverterUtil
+import com.rmulka.bs.util.buildGameResponse
 import com.rmulka.bs.util.toGameResponse
 import mu.KotlinLogging
 import org.jooq.JSONB
@@ -20,6 +22,7 @@ import java.util.UUID
 
 @Service
 class GameService(private val playerGameService: PlayerGameService,
+                  private val playerGameDao: PlayerGameDao,
                   private val gameDao: GameDao,
                   private val playerDao: PlayerDao,
                   private val objectMapper: ObjectMapper,
@@ -47,8 +50,8 @@ class GameService(private val playerGameService: PlayerGameService,
             }
         }
 
-    suspend fun fetchGame(gameId: UUID): Game =
-            converterUtil.toGameDomain(gameDao.fetchGame(gameId))
+    suspend fun fetchGame(gameId: UUID): GameResponse =
+            buildGameResponse(converterUtil.toGameDomain(gameDao.fetchGame(gameId)), playerGameDao.fetchPlayersByGameId(gameId))
 
     suspend fun createGame(userId: UUID): UUID =
             playerDao.fetchOneById(userId)?.let { player ->

@@ -5,6 +5,7 @@ import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.jooq.generated.Tables
 import com.rmulka.bs.jooq.generated.tables.daos.PlayerGameDao
 import com.rmulka.bs.jooq.generated.tables.pojos.Game
+import com.rmulka.bs.jooq.generated.tables.pojos.Player
 import com.rmulka.bs.jooq.generated.tables.pojos.PlayerGame
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
@@ -49,4 +50,11 @@ class PlayerGameDao(private val dslContext: DSLContext) : PlayerGameDao(dslConte
             .where(Tables.PLAYER_GAME.PLAYER_ID.eq(playerId))
             .fetchOneInto(Game::class.java)
             ?: throw ResourceNotFoundException("Player $playerId not in a game")
+
+    suspend fun fetchPlayersByGameId(gameId: UUID): List<Player> = dslContext
+            .select(*Tables.PLAYER.fields())
+            .from(Tables.PLAYER_GAME)
+            .innerJoin(Tables.PLAYER).on(Tables.PLAYER_GAME.PLAYER_ID.eq(Tables.PLAYER.ID))
+            .where(Tables.PLAYER_GAME.GAME_ID.eq(gameId))
+            .fetchInto(Player::class.java)
 }

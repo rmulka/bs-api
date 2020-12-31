@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -19,6 +20,7 @@ class PlayerGameService(private val gameDao: GameDao,
                         private val playerGameDao: PlayerGameDao,
                         private val converterUtil: ConverterUtil) {
 
+    @Transactional
     suspend fun deleteGame(playerGameDomain: PlayerGameDomain): Job =
         CoroutineScope(Dispatchers.IO).let {
             it.launch { gameDao.deleteGame(playerGameDomain.gameId) }
@@ -28,12 +30,14 @@ class PlayerGameService(private val gameDao: GameDao,
     suspend fun fetchGameByPlayerId(playerId: UUID): Game =
             playerGameDao.fetchGameByPlayerId(playerId).let { converterUtil.toGameDomain(it) }
 
+    @Transactional
     suspend fun joinGame(playerGameDomain: PlayerGameDomain, isCreator: Boolean): Job =
             CoroutineScope(Dispatchers.IO).let {
                 it.launch { playerGameDao.joinGame(playerGameDomain, isCreator) }
                 it.launch { gameDao.addPlayer(playerGameDomain.gameId) }
             }
 
+    @Transactional
     suspend fun playerLeaveGame(playerGameDomain: PlayerGameDomain): Job =
             CoroutineScope(Dispatchers.IO).let {
                 it.launch { gameDao.removePlayer(playerGameDomain.gameId) }

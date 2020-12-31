@@ -41,6 +41,7 @@ jooq {
                     database {
                         name = 'org.jooq.meta.postgres.PostgresDatabase'
                         inputSchema = 'bs'
+                        recordVersionFields = 'rec_version'
                     }
                     generate {
                         relations = true
