@@ -26,3 +26,11 @@ fun buildGameResponse(game: GameDomain, players: List<PlayerPojo>): GameResponse
                 creatorId = game.creatorId,
                 players = players.toPlayerDomain()
         )
+
+fun <T> List<T>.loopWithRepeatUntil(condition: () -> Boolean, block: (T) -> Unit) {
+    var idx = 0
+    while(condition()) {
+        block(this[idx])
+        idx = (idx + 1) % this.size
+    }
+}

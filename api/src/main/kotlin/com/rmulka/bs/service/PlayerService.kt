@@ -21,7 +21,8 @@ class PlayerService(private val playerDao: PlayerDao) {
                     UUID.randomUUID(),
                     playerDomain.name,
                     LocalDateTime.now(),
-                    LocalDateTime.now()
+                    LocalDateTime.now(),
+                    1
             ).let { player ->
                 logger.info("Creating player with id ${player.id} and name ${player.playerName}")
                 playerDao.insert(player)

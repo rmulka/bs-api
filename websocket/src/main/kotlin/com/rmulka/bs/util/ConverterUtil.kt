@@ -3,6 +3,7 @@ package com.rmulka.bs.util
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rmulka.bs.domain.Game
 import com.rmulka.bs.domain.GameDetails
+import org.jooq.JSONB
 import org.springframework.stereotype.Component
 import com.rmulka.bs.jooq.generated.tables.pojos.Game as GamePojo
 
@@ -21,4 +22,7 @@ class ConverterUtil(private val objectMapper: ObjectMapper) {
                     isActive = game.isActive,
                     creatorId = game.creatorId
             )
+
+    fun toGameDetails(details: JSONB): GameDetails =
+            objectMapper.readValue(details.toString(), GameDetails::class.java)
 }

@@ -19,7 +19,8 @@ class PlayerGameDao(private val dslContext: DSLContext) : PlayerGameDao(dslConte
                 UUID.randomUUID(),
                 playerGameDomain.playerId,
                 playerGameDomain.gameId,
-                creator
+                creator,
+                1
         ))
     }
 

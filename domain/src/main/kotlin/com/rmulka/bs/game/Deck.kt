@@ -9,8 +9,9 @@ class Deck {
         currentCardIdx = 0
     }
 
-    fun shuffle() {
+    fun shuffle(): Deck {
         deck.shuffle()
+        return this
     }
 
     fun dealCard(): Card = deck[currentCardIdx++]

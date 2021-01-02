@@ -1,5 +1,6 @@
 package com.rmulka.bs.response
 
+import com.rmulka.bs.jooq.generated.tables.pojos.Game
 import com.rmulka.bs.domain.GameDetails
 import com.rmulka.bs.domain.Player
 import java.time.LocalDateTime
@@ -16,4 +17,17 @@ data class GameResponse(
         val isActive: Boolean,
         val creatorId: UUID,
         val players: List<Player>
-)
+) {
+    constructor(game: Game, details: GameDetails, players: List<Player>): this(
+            id = game.id,
+            inProgress = game.inProgress,
+            details = details,
+            numPlayers = game.numPlayers,
+            creatorName = game.creatorName,
+            createdAt = game.createdAt,
+            updatedAt = game.updatedAt,
+            isActive = game.isActive,
+            creatorId = game.creatorId,
+            players = players
+    )
+}

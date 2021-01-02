@@ -54,7 +54,8 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 true,
-                player.id
+                player.id,
+                1
         ).let {
             this.insert(it)
             it.id
