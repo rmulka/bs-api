@@ -1,7 +1,6 @@
 package com.rmulka.bs.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rmulka.bs.domain.Game
 import com.rmulka.bs.domain.GameDetails
 import com.rmulka.bs.domain.PlayerGameDomain
 import com.rmulka.bs.exception.ResourceNotFoundException
@@ -12,8 +11,8 @@ import com.rmulka.bs.response.BasicGameResponse
 import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.response.PlayerGameResponse
 import com.rmulka.bs.util.ConverterUtil
-import com.rmulka.bs.util.buildGameResponse
-import com.rmulka.bs.util.toGameResponse
+import com.rmulka.bs.utils.buildGameResponse
+import com.rmulka.bs.utils.toGameResponse
 import mu.KotlinLogging
 import org.jooq.JSONB
 import org.springframework.stereotype.Service

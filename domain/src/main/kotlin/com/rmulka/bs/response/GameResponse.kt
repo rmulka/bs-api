@@ -12,8 +12,6 @@ data class GameResponse(
         val details: GameDetails,
         val numPlayers: Int,
         val creatorName: String,
-        val createdAt: LocalDateTime,
-        val updatedAt: LocalDateTime,
         val isActive: Boolean,
         val creatorId: UUID,
         val players: List<Player>
@@ -24,8 +22,6 @@ data class GameResponse(
             details = details,
             numPlayers = game.numPlayers,
             creatorName = game.creatorName,
-            createdAt = game.createdAt,
-            updatedAt = game.updatedAt,
             isActive = game.isActive,
             creatorId = game.creatorId,
             players = players

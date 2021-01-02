@@ -8,9 +8,9 @@ import com.rmulka.bs.repository.GameDao
 import com.rmulka.bs.repository.PlayerGameDao
 import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.util.ConverterUtil
-import com.rmulka.bs.util.buildGameResponse
-import com.rmulka.bs.util.loopWithRepeatUntil
-import com.rmulka.bs.util.toPlayerDomain
+import com.rmulka.bs.utils.buildGameResponse
+import com.rmulka.bs.utils.loopWithRepeatWhile
+import com.rmulka.bs.utils.toPlayerDomain
 import mu.KotlinLogging
 import org.jooq.JSONB
 import org.springframework.stereotype.Service
@@ -57,9 +57,9 @@ class GameService(private val gameDao: GameDao,
 
         val playerCards = players.map { it.id }.associateWith { mutableListOf<Card>() }
 
-        playerCards.keys.toList().loopWithRepeatUntil({ deck.isEmpty() }, {
+        playerCards.keys.toList().loopWithRepeatWhile({ !deck.isEmpty() }) {
             playerCards[it]?.add(deck.dealCard())
-        })
+        }
 
         val gameDetails = GameDetails(
                 playerIdNumberMap = playerIdNumMap,

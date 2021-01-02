@@ -1,4 +1,4 @@
-package com.rmulka.bs.util
+package com.rmulka.bs.utils
 
 import com.rmulka.bs.domain.Player
 import com.rmulka.bs.jooq.generated.tables.pojos.Game
@@ -20,14 +20,12 @@ fun buildGameResponse(game: GameDomain, players: List<PlayerPojo>): GameResponse
                 details = game.details,
                 numPlayers = game.numPlayers,
                 creatorName = game.creatorName,
-                createdAt = game.createdAt,
-                updatedAt = game.updatedAt,
                 isActive = game.isActive,
                 creatorId = game.creatorId,
                 players = players.toPlayerDomain()
         )
 
-fun <T> List<T>.loopWithRepeatUntil(condition: () -> Boolean, block: (T) -> Unit) {
+fun <T> List<T>.loopWithRepeatWhile(condition: () -> Boolean, block: (T) -> Unit) {
     var idx = 0
     while(condition()) {
         block(this[idx])
