@@ -12,5 +12,6 @@ data class GameDetails(
         val isWinner: Boolean = false,
         val winnerName: String? = null,
         val numCardsLastPlayed: Int? = null,
-        val lastPlayedCard: Card? = null
+        val lastPlayedCard: Card? = null,
+        val currentRank: Int? = null
 )

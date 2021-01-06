@@ -7,7 +7,7 @@ import com.rmulka.bs.domain.Game as GameDomain
 import com.rmulka.bs.response.BasicGameResponse
 import com.rmulka.bs.response.GameResponse
 
-fun List<Game>.toGameResponse(): List<BasicGameResponse> =
+fun List<Game>.toBasicGameResponse(): List<BasicGameResponse> =
         this.map { BasicGameResponse(it.id, it.inProgress, it.numPlayers, it.creatorName) }
 
 fun List<PlayerPojo>.toPlayerDomain(): List<Player> =

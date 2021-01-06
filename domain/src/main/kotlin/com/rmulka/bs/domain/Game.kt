@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class Game(
-
         val id: UUID,
         val inProgress: Boolean,
         val details: GameDetails,

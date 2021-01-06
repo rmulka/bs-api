@@ -12,7 +12,7 @@ import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.response.PlayerGameResponse
 import com.rmulka.bs.util.ConverterUtil
 import com.rmulka.bs.utils.buildGameResponse
-import com.rmulka.bs.utils.toGameResponse
+import com.rmulka.bs.utils.toBasicGameResponse
 import mu.KotlinLogging
 import org.jooq.JSONB
 import org.springframework.stereotype.Service
@@ -59,7 +59,7 @@ class GameService(private val playerGameService: PlayerGameService,
                 }
             } ?: throw ResourceNotFoundException("Player id $userId not found")
 
-    suspend fun fetchAllGames(): List<BasicGameResponse> = gameDao.fetchAllGames().toGameResponse()
+    suspend fun fetchAllGames(): List<BasicGameResponse> = gameDao.fetchAllGames().toBasicGameResponse()
 
     @Transactional
     suspend fun leaveGame(playerGameDomain: PlayerGameDomain): PlayerGameResponse =

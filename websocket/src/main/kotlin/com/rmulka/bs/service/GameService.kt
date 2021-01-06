@@ -61,16 +61,21 @@ class GameService(private val gameDao: GameDao,
             playerCards[it]?.add(deck.dealCard())
         }
 
+        val startingTurn = playerCards.entries.find { it.value.any { card -> card == Card(1, 1) } }?.let {
+            playerIdNumMap[it.key]
+        }
+
         val gameDetails = GameDetails(
                 playerIdNumberMap = playerIdNumMap,
                 playerOrder = playerOrder,
-                currentTurn = 1,
+                currentTurn = startingTurn,
                 playerCards = playerCards,
                 pile = listOf(),
                 isWinner = false,
                 winnerName = null,
                 numCardsLastPlayed = null,
-                lastPlayedCard = null
+                lastPlayedCard = null,
+                currentRank = 1
         )
 
         return gameDao.startGame(gameId, JSONB.jsonb(objectMapper.writeValueAsString(gameDetails))).let { dbGame ->
