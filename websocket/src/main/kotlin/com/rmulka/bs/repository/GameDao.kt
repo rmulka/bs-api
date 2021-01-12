@@ -26,4 +26,12 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
                     record.into(Game::class.java)
                 }
             }
+
+    fun updateGameDetails(game: Game, details: JSONB): Game =
+            dslContext.newRecord(Tables.GAME, game).let { record ->
+                record.details = details
+                record.updatedAt = LocalDateTime.now()
+                record.update()
+                record.into(Game::class.java)
+            }
 }
