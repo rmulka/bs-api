@@ -2,6 +2,7 @@ package com.rmulka.bs.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rmulka.bs.domain.GameDetails
+import com.rmulka.bs.domain.Player
 import com.rmulka.bs.domain.PlayerTurn
 import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.game.Card
@@ -99,14 +100,13 @@ class GameService(private val gameDao: GameDao,
         val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
 
         val prevPlayerUuid = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == gameDomain.details.playerOrder[gameDomain.details.prevTurn]}?.key
-        val isWinner = gameDomain.details.playerCards?.get(prevPlayerUuid)?.size == 0
-        val winnerName = if (isWinner) players.find { it.id == prevPlayerUuid }?.name else null
+        val (isWinner, winnerName) = checkForWinner(gameDomain.details.playerCards, prevPlayerUuid, players, gameId)
 
         val playedCards = playerTurn.playedCards.toSet()
-        val oldCards = gameDomain.details.playerCards?.get(playerTurn.playerId)?.toSet()
+        val oldCards = gameDomain.details.playerCards[playerTurn.playerId]?.toSet()
                 ?: throw ResourceNotFoundException("Player ${playerTurn.playerId} cards not found")
 
-        val newPlayerCards = gameDomain.details.playerCards?.entries?.fold(mapOf<UUID, List<Card>>()) { acc, entry ->
+        val newPlayerCards = gameDomain.details.playerCards.entries.fold(mapOf<UUID, List<Card>>()) { acc, entry ->
             when {
                 entry.key != playerTurn.playerId -> acc.plus(entry.toPair())
                 else -> acc.plus(Pair(playerTurn.playerId, (oldCards - playedCards).toList()))
@@ -155,11 +155,13 @@ class GameService(private val gameDao: GameDao,
         val playerGettingBsNum = gameDomain.details.playerOrder.entries.find { (_, num) -> num == gameDomain.details.prevTurn }?.key
         val playerGettingBsId = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == playerGettingBsNum }?.key
 
+        val (isWinner, winnerName) = checkForWinner(gameDomain.details.playerCards, playerGettingBsId, players, gameId)
+
         val lastCardsPlayed = gameDomain.details.pile.takeLast(gameDomain.details.numCardsLastPlayed)
 
         val isBs = lastCardsPlayed.any { card -> card.rank != gameDomain.details.lastPlayedRank }
 
-        val newPlayerCards = gameDomain.details.playerCards?.entries?.fold(mapOf<UUID, List<Card>>()) { acc, entry ->
+        val newPlayerCards = gameDomain.details.playerCards.entries.fold(mapOf<UUID, List<Card>>()) { acc, entry ->
             when {
                 isBs && entry.key == playerGettingBsId -> acc.plus(Pair(entry.key, entry.value + gameDomain.details.pile))
                 !isBs && entry.key == playerId -> acc.plus(Pair(entry.key, entry.value + gameDomain.details.pile))
@@ -174,8 +176,8 @@ class GameService(private val gameDao: GameDao,
                 prevTurn = gameDomain.details.prevTurn,
                 playerCards = newPlayerCards,
                 pile = listOf(),
-                isWinner = false,
-                winnerName = null,
+                isWinner = isWinner,
+                winnerName = winnerName,
                 numCardsLastPlayed = gameDomain.details.numCardsLastPlayed,
                 lastPlayedRank = gameDomain.details.lastPlayedRank,
                 currentRank = gameDomain.details.currentRank,
@@ -191,5 +193,18 @@ class GameService(private val gameDao: GameDao,
                 logger.info("Game $gameId: player $playerId called BS and it was $isBs")
             }
         }
+    }
+
+    private fun checkForWinner(
+            playerCards: Map<UUID, List<Card>>,
+            playerId: UUID?,
+            players: List<Player>,
+            gameId: UUID
+    ): Pair<Boolean, String?> = (playerCards[playerId]?.size == 0).let { isWinner ->
+        val winnerName = if (isWinner) players.find { it.id == playerId }?.name.also {
+            logger.info("Game $gameId: player $playerId is the winner")
+        } else null
+
+        Pair(isWinner, winnerName)
     }
 }

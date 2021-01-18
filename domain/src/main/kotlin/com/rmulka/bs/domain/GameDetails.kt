@@ -8,7 +8,7 @@ data class GameDetails(
         val playerOrder: Map<Int, Int> = emptyMap(),
         val currentTurn: Int? = null,
         val prevTurn: Int? = null,
-        val playerCards: Map<UUID, List<Card>>? = null,
+        val playerCards: Map<UUID, List<Card>> = emptyMap(),
         val pile: List<Card> = listOf(),
         val isWinner: Boolean = false,
         val winnerName: String? = null,

@@ -4,7 +4,6 @@ import com.rmulka.bs.request.BsRequest
 import com.rmulka.bs.request.PlayerTurnRequest
 import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.service.GameService
-import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.SendTo
@@ -13,10 +12,6 @@ import java.util.UUID
 
 @Controller
 class GameController(private val gameService: GameService) {
-
-    companion object {
-        val logger = KotlinLogging.logger {}
-    }
 
     @MessageMapping("/game/details/{gameId}")
     @SendTo("/topic/game/{gameId}")
