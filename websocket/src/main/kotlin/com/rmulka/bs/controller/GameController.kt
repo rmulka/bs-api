@@ -1,5 +1,6 @@
 package com.rmulka.bs.controller
 
+import com.rmulka.bs.request.BsRequest
 import com.rmulka.bs.request.PlayerTurnRequest
 import com.rmulka.bs.response.GameResponse
 import com.rmulka.bs.service.GameService
@@ -31,4 +32,11 @@ class GameController(private val gameService: GameService) {
             @DestinationVariable gameId: UUID,
             playerTurnRequest: PlayerTurnRequest
     ): GameResponse = gameService.processTurn(gameId, playerTurnRequest.toPlayerTurn())
+
+    @MessageMapping("/game/update/{gameId}/bs")
+    @SendTo("/topic/game/{gameId}")
+    fun processBS(
+            @DestinationVariable gameId: UUID,
+            request: BsRequest
+    ): GameResponse = gameService.processBs(gameId, request.playerId)
 }

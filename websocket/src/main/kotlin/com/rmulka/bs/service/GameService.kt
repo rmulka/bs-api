@@ -72,14 +72,19 @@ class GameService(private val gameDao: GameDao,
                 playerIdNumberMap = playerIdNumMap,
                 playerOrder = playerOrder,
                 currentTurn = startingTurn,
+                prevTurn = null,
                 playerCards = playerCards,
                 pile = listOf(),
                 isWinner = false,
                 winnerName = null,
-                numCardsLastPlayed = null,
+                numCardsLastPlayed = 0,
                 lastPlayedRank = null,
                 currentRank = 1,
-                firstTurn = true
+                firstTurn = true,
+                bsCalled = false,
+                isBs = false,
+                bsPlayerId = null,
+                playerCalledBsId = null
         )
 
         return gameDao.startGame(gameId, JSONB.jsonb(objectMapper.writeValueAsString(gameDetails))).let { dbGame ->
@@ -93,6 +98,10 @@ class GameService(private val gameDao: GameDao,
         val gameDomain = converterUtil.toGameDomain(game)
         val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
 
+        val prevPlayerUuid = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == gameDomain.details.playerOrder[gameDomain.details.prevTurn]}?.key
+        val isWinner = gameDomain.details.playerCards?.get(prevPlayerUuid)?.size == 0
+        val winnerName = if (isWinner) players.find { it.id == prevPlayerUuid }?.name else null
+
         val playedCards = playerTurn.playedCards.toSet()
         val oldCards = gameDomain.details.playerCards?.get(playerTurn.playerId)?.toSet()
                 ?: throw ResourceNotFoundException("Player ${playerTurn.playerId} cards not found")
@@ -104,26 +113,82 @@ class GameService(private val gameDao: GameDao,
             }
         }
 
-        val pile = gameDomain.details.pile?.plus(playerTurn.playedCards)
+        val pile = gameDomain.details.pile.plus(playerTurn.playedCards)
         val lastPlayedRank = gameDomain.details.currentRank ?: throw ResourceNotFoundException("Game $gameId current rank not found")
 
         val newGameDetails = GameDetails(
                 playerIdNumberMap = gameDomain.details.playerIdNumberMap,
                 playerOrder = gameDomain.details.playerOrder,
                 currentTurn = gameDomain.details.currentTurn?.let { currentTurn -> currentTurn % game.numPlayers + 1 },
+                prevTurn = gameDomain.details.currentTurn,
                 playerCards = newPlayerCards,
                 pile = pile,
-                isWinner = false,
-                winnerName = null,
+                isWinner = isWinner,
+                winnerName = winnerName,
                 numCardsLastPlayed = playedCards.size,
                 lastPlayedRank = lastPlayedRank,
                 currentRank = (lastPlayedRank % 13) + 1,
-                firstTurn = false
+                firstTurn = false,
+                bsCalled = false,
+                isBs = false,
+                bsPlayerId = null,
+                playerCalledBsId = null
         )
 
         return gameDao.updateGameDetails(game, JSONB.jsonb(objectMapper.writeValueAsString(newGameDetails))).let { dbGame ->
             GameResponse(dbGame, converterUtil.toGameDetails(dbGame.details), players).also {
-                logger.info("Game $gameId updated...Player ${playerTurn.playerId} played ${playerTurn.playedCards.size} ${playerTurn.playedCards.first().rank}'s")
+                logger.info("Game $gameId updated...Player ${playerTurn.playerId} played ${playerTurn.playedCards.size} $lastPlayedRank's")
+            }
+        }
+    }
+
+    @Transactional
+    fun processBs(gameId: UUID, playerId: UUID): GameResponse {
+        val game = gameDao.fetchGame(gameId)
+        val gameDomain = converterUtil.toGameDomain(game)
+        val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
+
+        if (gameDomain.details.bsCalled) return GameResponse(game, converterUtil.toGameDetails(game.details), players).also {
+            logger.info("Game $gameId: player $playerId called BS but was already called...skipping")
+        }
+
+        val playerGettingBsNum = gameDomain.details.playerOrder.entries.find { (_, num) -> num == gameDomain.details.prevTurn }?.key
+        val playerGettingBsId = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == playerGettingBsNum }?.key
+
+        val lastCardsPlayed = gameDomain.details.pile.takeLast(gameDomain.details.numCardsLastPlayed)
+
+        val isBs = lastCardsPlayed.any { card -> card.rank != gameDomain.details.lastPlayedRank }
+
+        val newPlayerCards = gameDomain.details.playerCards?.entries?.fold(mapOf<UUID, List<Card>>()) { acc, entry ->
+            when {
+                isBs && entry.key == playerGettingBsId -> acc.plus(Pair(entry.key, entry.value + gameDomain.details.pile))
+                !isBs && entry.key == playerId -> acc.plus(Pair(entry.key, entry.value + gameDomain.details.pile))
+                else -> acc.plus(entry.toPair())
+            }
+        }
+
+        val newGameDetails = GameDetails(
+                playerIdNumberMap = gameDomain.details.playerIdNumberMap,
+                playerOrder = gameDomain.details.playerOrder,
+                currentTurn = gameDomain.details.currentTurn,
+                prevTurn = gameDomain.details.prevTurn,
+                playerCards = newPlayerCards,
+                pile = listOf(),
+                isWinner = false,
+                winnerName = null,
+                numCardsLastPlayed = gameDomain.details.numCardsLastPlayed,
+                lastPlayedRank = gameDomain.details.lastPlayedRank,
+                currentRank = gameDomain.details.currentRank,
+                firstTurn = false,
+                bsCalled = true,
+                isBs = isBs,
+                bsPlayerId = playerGettingBsId,
+                playerCalledBsId = playerId
+        )
+
+        return gameDao.updateGameDetails(game, JSONB.jsonb(objectMapper.writeValueAsString(newGameDetails))).let { dbGame ->
+            GameResponse(dbGame, converterUtil.toGameDetails(dbGame.details), players).also {
+                logger.info("Game $gameId: player $playerId called BS and it was $isBs")
             }
         }
     }
