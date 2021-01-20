@@ -3,6 +3,8 @@ package com.rmulka.bs.repository
 import com.rmulka.bs.jooq.generated.Tables
 import com.rmulka.bs.jooq.generated.tables.daos.ChatDao
 import com.rmulka.bs.jooq.generated.tables.pojos.Chat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
