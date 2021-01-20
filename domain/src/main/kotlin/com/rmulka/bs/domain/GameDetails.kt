@@ -11,7 +11,7 @@ data class GameDetails(
         val playerCards: Map<UUID, List<Card>> = emptyMap(),
         val pile: List<Card> = listOf(),
         val isWinner: Boolean = false,
-        val winnerName: String? = null,
+        val winnerId: UUID? = null,
         val numCardsLastPlayed: Int = 0,
         val lastPlayedRank: Int? = null,
         val currentRank: Int? = null,

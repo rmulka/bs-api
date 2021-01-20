@@ -1,8 +1,10 @@
 package com.rmulka.bs.controller
 
 import com.rmulka.bs.request.BsRequest
+import com.rmulka.bs.request.MessageRequest
 import com.rmulka.bs.request.PlayerTurnRequest
 import com.rmulka.bs.response.GameResponse
+import com.rmulka.bs.response.MessageResponse
 import com.rmulka.bs.service.GameService
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
@@ -34,4 +36,11 @@ class GameController(private val gameService: GameService) {
             @DestinationVariable gameId: UUID,
             request: BsRequest
     ): GameResponse = gameService.processBs(gameId, request.playerId)
+
+    @MessageMapping("/chat/{gameId}")
+    @SendTo("/topic/chat/{gameId}")
+    fun processChatMessage(
+            @DestinationVariable gameId: UUID,
+            messageRequest: MessageRequest
+    ): MessageResponse = gameService.processChatMessage(gameId, messageRequest.playerId, messageRequest.message)
 }

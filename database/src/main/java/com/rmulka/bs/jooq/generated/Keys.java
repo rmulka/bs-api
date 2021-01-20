@@ -4,9 +4,11 @@
 package com.rmulka.bs.jooq.generated;
 
 
+import com.rmulka.bs.jooq.generated.tables.Chat;
 import com.rmulka.bs.jooq.generated.tables.Game;
 import com.rmulka.bs.jooq.generated.tables.Player;
 import com.rmulka.bs.jooq.generated.tables.PlayerGame;
+import com.rmulka.bs.jooq.generated.tables.records.ChatRecord;
 import com.rmulka.bs.jooq.generated.tables.records.GameRecord;
 import com.rmulka.bs.jooq.generated.tables.records.PlayerGameRecord;
 import com.rmulka.bs.jooq.generated.tables.records.PlayerRecord;
@@ -33,6 +35,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<ChatRecord> CHAT_PKEY = UniqueKeys0.CHAT_PKEY;
     public static final UniqueKey<GameRecord> GAME_PKEY = UniqueKeys0.GAME_PKEY;
     public static final UniqueKey<PlayerRecord> PLAYER_PKEY = UniqueKeys0.PLAYER_PKEY;
     public static final UniqueKey<PlayerGameRecord> PLAYER_GAME_PKEY = UniqueKeys0.PLAYER_GAME_PKEY;
@@ -49,6 +52,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 {
+        public static final UniqueKey<ChatRecord> CHAT_PKEY = Internal.createUniqueKey(Chat.CHAT, "chat_pkey", new TableField[] { Chat.CHAT.ID }, true);
         public static final UniqueKey<GameRecord> GAME_PKEY = Internal.createUniqueKey(Game.GAME, "game_pkey", new TableField[] { Game.GAME.ID }, true);
         public static final UniqueKey<PlayerRecord> PLAYER_PKEY = Internal.createUniqueKey(Player.PLAYER, "player_pkey", new TableField[] { Player.PLAYER.ID }, true);
         public static final UniqueKey<PlayerGameRecord> PLAYER_GAME_PKEY = Internal.createUniqueKey(PlayerGame.PLAYER_GAME, "player_game_pkey", new TableField[] { PlayerGame.PLAYER_GAME.ID }, true);

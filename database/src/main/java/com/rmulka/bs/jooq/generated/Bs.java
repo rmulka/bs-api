@@ -4,6 +4,7 @@
 package com.rmulka.bs.jooq.generated;
 
 
+import com.rmulka.bs.jooq.generated.tables.Chat;
 import com.rmulka.bs.jooq.generated.tables.Game;
 import com.rmulka.bs.jooq.generated.tables.Player;
 import com.rmulka.bs.jooq.generated.tables.PlayerGame;
@@ -22,12 +23,17 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Bs extends SchemaImpl {
 
-    private static final long serialVersionUID = -930657926;
+    private static final long serialVersionUID = -170168731;
 
     /**
      * The reference instance of <code>bs</code>
      */
     public static final Bs BS = new Bs();
+
+    /**
+     * The table <code>bs.chat</code>.
+     */
+    public final Chat CHAT = Chat.CHAT;
 
     /**
      * The table <code>bs.game</code>.
@@ -60,6 +66,7 @@ public class Bs extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
+            Chat.CHAT,
             Game.GAME,
             Player.PLAYER,
             PlayerGame.PLAYER_GAME);

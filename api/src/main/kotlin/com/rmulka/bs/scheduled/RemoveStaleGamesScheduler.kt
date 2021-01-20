@@ -17,7 +17,7 @@ class RemoveStaleGamesScheduler(private val gameDao: GameDao) {
         private val logger = KotlinLogging.logger {}
     }
 
-    @Scheduled(cron = "0 0/5 * * * *", zone = "GMT-6")
+    @Scheduled(cron = "0 0/10 * * * *", zone = "GMT-6")
     fun removeStaleGames() {
         GlobalScope.launch {
             gameDao.removeStaleGames(LocalDateTime.now()).also {

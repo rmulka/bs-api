@@ -1,30 +1,20 @@
 package com.rmulka.bs.repository
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.jooq.generated.Tables
 import com.rmulka.bs.jooq.generated.tables.pojos.Game
 import com.rmulka.bs.jooq.generated.tables.daos.GameDao
 import com.rmulka.bs.jooq.generated.tables.pojos.Player
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jooq.DSLContext
 import org.jooq.JSONB
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.coroutines.CoroutineContext
 
 @Repository
 class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configuration()) {
-
-    suspend fun getNumPlayersInGame(gameId: UUID): Int = dslContext
-            .select(Tables.GAME.NUM_PLAYERS)
-            .from(Tables.GAME)
-            .where(Tables.GAME.ID.eq(gameId))
-            .fetchOneInto(Int::class.java) ?: throw ResourceNotFoundException("Game id $gameId does not exist")
 
     suspend fun fetchAllGames(): List<Game> = dslContext
             .selectFrom(Tables.GAME)
@@ -78,7 +68,7 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
     private suspend fun fetchStaleGameIds(now: LocalDateTime): List<UUID> = dslContext
             .select()
             .from(Tables.GAME)
-            .where(Tables.GAME.UPDATED_AT.lessThan(now.minusMinutes(5)).and(Tables.GAME.IS_ACTIVE.eq(true)))
+            .where(Tables.GAME.UPDATED_AT.lessThan(now.minusMinutes(10)).and(Tables.GAME.IS_ACTIVE.eq(true)))
             .fetch(Tables.GAME.ID, UUID::class.java)
 
     suspend fun removeStaleGames(now: LocalDateTime): List<UUID> = withContext(Dispatchers.IO) {
@@ -86,7 +76,7 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
             dslContext
                     .update(Tables.GAME)
                     .set(Tables.GAME.IS_ACTIVE, false)
-                    .where(Tables.GAME.UPDATED_AT.lessThan(now.minusMinutes(5)).and(Tables.GAME.IS_ACTIVE.eq(true)))
+                    .where(Tables.GAME.UPDATED_AT.lessThan(now.minusMinutes(10)).and(Tables.GAME.IS_ACTIVE.eq(true)))
                     .execute()
 
             dslContext

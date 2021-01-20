@@ -7,9 +7,11 @@ import com.rmulka.bs.domain.PlayerTurn
 import com.rmulka.bs.exception.ResourceNotFoundException
 import com.rmulka.bs.game.Card
 import com.rmulka.bs.game.Deck
+import com.rmulka.bs.repository.ChatDao
 import com.rmulka.bs.repository.GameDao
 import com.rmulka.bs.repository.PlayerGameDao
 import com.rmulka.bs.response.GameResponse
+import com.rmulka.bs.response.MessageResponse
 import com.rmulka.bs.util.ConverterUtil
 import com.rmulka.bs.utils.buildGameResponse
 import com.rmulka.bs.utils.loopWithRepeatWhile
@@ -23,6 +25,7 @@ import java.util.UUID
 @Service
 class GameService(private val gameDao: GameDao,
                   private val playerGameDao: PlayerGameDao,
+                  private val chatDao: ChatDao,
                   private val objectMapper: ObjectMapper,
                   private val converterUtil: ConverterUtil) {
 
@@ -77,7 +80,7 @@ class GameService(private val gameDao: GameDao,
                 playerCards = playerCards,
                 pile = listOf(),
                 isWinner = false,
-                winnerName = null,
+                winnerId = null,
                 numCardsLastPlayed = 0,
                 lastPlayedRank = null,
                 currentRank = 1,
@@ -100,7 +103,7 @@ class GameService(private val gameDao: GameDao,
         val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
 
         val prevPlayerUuid = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == gameDomain.details.playerOrder[gameDomain.details.prevTurn]}?.key
-        val (isWinner, winnerName) = checkForWinner(gameDomain.details.playerCards, prevPlayerUuid, players, gameId)
+        val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, prevPlayerUuid, players, gameId)
 
         val playedCards = playerTurn.playedCards.toSet()
         val oldCards = gameDomain.details.playerCards[playerTurn.playerId]?.toSet()
@@ -124,7 +127,7 @@ class GameService(private val gameDao: GameDao,
                 playerCards = newPlayerCards,
                 pile = pile,
                 isWinner = isWinner,
-                winnerName = winnerName,
+                winnerId = winnerId,
                 numCardsLastPlayed = playedCards.size,
                 lastPlayedRank = lastPlayedRank,
                 currentRank = (lastPlayedRank % 13) + 1,
@@ -155,7 +158,7 @@ class GameService(private val gameDao: GameDao,
         val playerGettingBsNum = gameDomain.details.playerOrder.entries.find { (_, num) -> num == gameDomain.details.prevTurn }?.key
         val playerGettingBsId = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == playerGettingBsNum }?.key
 
-        val (isWinner, winnerName) = checkForWinner(gameDomain.details.playerCards, playerGettingBsId, players, gameId)
+        val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, playerGettingBsId, players, gameId)
 
         val lastCardsPlayed = gameDomain.details.pile.takeLast(gameDomain.details.numCardsLastPlayed)
 
@@ -177,7 +180,7 @@ class GameService(private val gameDao: GameDao,
                 playerCards = newPlayerCards,
                 pile = listOf(),
                 isWinner = isWinner,
-                winnerName = winnerName,
+                winnerId = winnerId,
                 numCardsLastPlayed = gameDomain.details.numCardsLastPlayed,
                 lastPlayedRank = gameDomain.details.lastPlayedRank,
                 currentRank = gameDomain.details.currentRank,
@@ -195,16 +198,25 @@ class GameService(private val gameDao: GameDao,
         }
     }
 
+    @Transactional
+    fun processChatMessage(gameId: UUID, playerId: UUID, message: String): MessageResponse {
+        val insertedMessage = chatDao.insertMessage(gameId, playerId, message)
+        val gameMessages = chatDao.fetchMessages(gameId).map { chat -> Pair(chat.playerId, chat.message) }
+        return MessageResponse(gameMessages).also {
+            gameDao.gameUpdated(gameId, insertedMessage.createdAt)
+        }
+    }
+
     private fun checkForWinner(
             playerCards: Map<UUID, List<Card>>,
             playerId: UUID?,
             players: List<Player>,
             gameId: UUID
-    ): Pair<Boolean, String?> = (playerCards[playerId]?.size == 0).let { isWinner ->
-        val winnerName = if (isWinner) players.find { it.id == playerId }?.name.also {
+    ): Pair<Boolean, UUID?> = (playerCards[playerId]?.size == 0).let { isWinner ->
+        val winnerId = if (isWinner) players.find { it.id == playerId }?.id.also {
             logger.info("Game $gameId: player $playerId is the winner")
         } else null
 
-        Pair(isWinner, winnerName)
+        Pair(isWinner, winnerId)
     }
 }

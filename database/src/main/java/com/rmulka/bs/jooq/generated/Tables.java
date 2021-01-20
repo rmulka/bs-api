@@ -4,6 +4,7 @@
 package com.rmulka.bs.jooq.generated;
 
 
+import com.rmulka.bs.jooq.generated.tables.Chat;
 import com.rmulka.bs.jooq.generated.tables.Game;
 import com.rmulka.bs.jooq.generated.tables.Player;
 import com.rmulka.bs.jooq.generated.tables.PlayerGame;
@@ -14,6 +15,11 @@ import com.rmulka.bs.jooq.generated.tables.PlayerGame;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>bs.chat</code>.
+     */
+    public static final Chat CHAT = Chat.CHAT;
 
     /**
      * The table <code>bs.game</code>.
