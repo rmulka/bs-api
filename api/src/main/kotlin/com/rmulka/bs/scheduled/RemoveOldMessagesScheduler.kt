@@ -18,7 +18,7 @@ class RemoveOldMessagesScheduler(private val chatDao: ChatDao) {
     }
 
     @Scheduled(cron = "0 0 4 * * *", zone = "GMT-6")
-    fun removeStaleGames() {
+    fun removeOldMessages() {
         GlobalScope.launch {
             chatDao.removeOldMessages(LocalDateTime.now().minusDays(1)).also {
                 logger.info("Executed scheduled old messages removal...removed $it chat messages")
