@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/bs
+    username: user
+    password: pass
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health,info,metrics'
