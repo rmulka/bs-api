@@ -14,7 +14,7 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/players")
-@CrossOrigin(origins = ["http://localhost:3000"])
+@CrossOrigin(origins = ["http://localhost:3000", "https://bs-game.herokuapp.com"])
 class PlayerController(private val playerService: PlayerService) {
 
     @PostMapping

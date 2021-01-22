@@ -21,7 +21,7 @@ import javax.validation.constraints.NotBlank
 
 @RestController
 @RequestMapping("/games")
-@CrossOrigin(origins = ["http://localhost:3000"])
+@CrossOrigin(origins = ["http://localhost:3000", "https://bs-game.herokuapp.com"])
 class GameController(private val gameService: GameService) {
 
     @GetMapping
