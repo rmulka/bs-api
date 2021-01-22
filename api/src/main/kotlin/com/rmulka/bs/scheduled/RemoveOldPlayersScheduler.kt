@@ -1,6 +1,6 @@
 package com.rmulka.bs.scheduled
 
-import com.rmulka.bs.repository.ChatDao
+import com.rmulka.bs.repository.PlayerDao
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
@@ -11,17 +11,17 @@ import java.time.LocalDateTime
 
 @Component
 @EnableScheduling
-class RemoveOldMessagesScheduler(private val chatDao: ChatDao) {
+class RemoveOldPlayersScheduler(private val playerDao: PlayerDao) {
 
     companion object {
         private val logger = KotlinLogging.logger {}
     }
 
     @Scheduled(cron = "0 0/20 * * * *", zone = "GMT-6")
-    fun removeOldMessages() {
+    fun removeStaleGames() {
         GlobalScope.launch {
-            chatDao.removeOldMessages(LocalDateTime.now().minusHours(4)).also {
-                logger.info("Executed scheduled old messages removal...removed $it chat messages")
+            playerDao.removeOldPlayers(LocalDateTime.now().minusDays(1)).also {
+                logger.info("Executed scheduled old players removal...removed $it players")
             }
         }
     }

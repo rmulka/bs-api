@@ -25,4 +25,13 @@ class RemoveStaleGamesScheduler(private val gameDao: GameDao) {
             }
         }
     }
+
+    @Scheduled(cron = "0 0/20 * * * *", zone = "GMT-6")
+    fun deleteOldGames() {
+        GlobalScope.launch {
+            gameDao.deleteOldGames(LocalDateTime.now().minusDays(1)).also {
+                logger.info("Executed scheduled old game deletion...deleted $it games")
+            }
+        }
+    }
 }

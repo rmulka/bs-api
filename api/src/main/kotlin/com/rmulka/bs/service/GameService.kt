@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rmulka.bs.domain.GameDetails
 import com.rmulka.bs.domain.PlayerGameDomain
 import com.rmulka.bs.exception.ResourceNotFoundException
+import com.rmulka.bs.repository.ChatDao
 import com.rmulka.bs.repository.GameDao
 import com.rmulka.bs.repository.PlayerDao
 import com.rmulka.bs.repository.PlayerGameDao
@@ -23,6 +24,7 @@ import java.util.UUID
 class GameService(private val playerGameService: PlayerGameService,
                   private val playerGameDao: PlayerGameDao,
                   private val gameDao: GameDao,
+                  private val chatDao: ChatDao,
                   private val playerDao: PlayerDao,
                   private val objectMapper: ObjectMapper,
                   private val converterUtil: ConverterUtil) {
@@ -68,10 +70,12 @@ class GameService(private val playerGameService: PlayerGameService,
                 game.inProgress -> {
                     logger.info("Game ${game.id} was in progress when player ${playerGameDomain.playerId} left...soft deleting")
                     playerGameService.deleteGame(playerGameDomain)
+                    chatDao.removeGameMessages(playerGameDomain.gameId)
                 }
                 game.numPlayers == 1 || game.creatorId == playerGameDomain.playerId -> {
                     logger.info("Player ${playerGameDomain.playerId} was game creator or last player in game ${game.id}...soft deleting")
                     playerGameService.deleteGame(playerGameDomain)
+                    chatDao.removeGameMessages(playerGameDomain.gameId)
                 }
                 else -> {
                     playerGameService.playerLeaveGame(playerGameDomain)

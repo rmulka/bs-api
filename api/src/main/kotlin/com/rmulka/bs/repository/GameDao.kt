@@ -85,4 +85,11 @@ class GameDao(private val dslContext: DSLContext) : GameDao(dslContext.configura
                     .execute()
         }
     }
+
+    suspend fun deleteOldGames(time: LocalDateTime): Int = withContext(Dispatchers.IO) {
+        dslContext
+                .deleteFrom(Tables.GAME)
+                .where(Tables.GAME.CREATED_AT.lt(time).and(Tables.GAME.IS_ACTIVE.eq(false)))
+                .execute()
+    }
 }
