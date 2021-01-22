@@ -59,6 +59,7 @@ class GameService(private val gameDao: GameDao,
         val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
 
         val playerIdNumMap = players.foldIndexed(mapOf<UUID, Int>()) { idx, acc, player -> acc.plus(Pair(player.id, idx + 1)) }
+        val playerNumberIdMap = playerIdNumMap.entries.map { (id, num) -> Pair(num, id) }.toMap()
         val playerOrder = (1..players.size).zip((1..players.size).shuffled()).toMap()
 
         val playerCards = players.map { it.id }.associateWith { mutableListOf<Card>() }
@@ -74,6 +75,7 @@ class GameService(private val gameDao: GameDao,
 
         val gameDetails = GameDetails(
                 playerIdNumberMap = playerIdNumMap,
+                playerNumberIdMap = playerNumberIdMap,
                 playerOrder = playerOrder,
                 currentTurn = startingTurn,
                 prevTurn = null,
@@ -102,7 +104,7 @@ class GameService(private val gameDao: GameDao,
         val gameDomain = converterUtil.toGameDomain(game)
         val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
 
-        val prevPlayerUuid = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == gameDomain.details.playerOrder[gameDomain.details.prevTurn]}?.key
+        val prevPlayerUuid = gameDomain.details.playerNumberIdMap[gameDomain.details.playerOrder[gameDomain.details.prevTurn]]
         val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, prevPlayerUuid, players, gameId)
 
         val playedCards = playerTurn.playedCards.toSet()
@@ -121,6 +123,7 @@ class GameService(private val gameDao: GameDao,
 
         val newGameDetails = GameDetails(
                 playerIdNumberMap = gameDomain.details.playerIdNumberMap,
+                playerNumberIdMap = gameDomain.details.playerNumberIdMap,
                 playerOrder = gameDomain.details.playerOrder,
                 currentTurn = gameDomain.details.currentTurn?.let { currentTurn -> currentTurn % game.numPlayers + 1 },
                 prevTurn = gameDomain.details.currentTurn,
@@ -155,8 +158,7 @@ class GameService(private val gameDao: GameDao,
             logger.info("Game $gameId: player $playerId called BS but was already called...skipping")
         }
 
-        val playerGettingBsNum = gameDomain.details.playerOrder.entries.find { (_, num) -> num == gameDomain.details.prevTurn }?.key
-        val playerGettingBsId = gameDomain.details.playerIdNumberMap.entries.find { (_, num) -> num == playerGettingBsNum }?.key
+        val playerGettingBsId = gameDomain.details.playerNumberIdMap[gameDomain.details.playerOrder[gameDomain.details.prevTurn]]
 
         val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, playerGettingBsId, players, gameId)
 
@@ -174,6 +176,7 @@ class GameService(private val gameDao: GameDao,
 
         val newGameDetails = GameDetails(
                 playerIdNumberMap = gameDomain.details.playerIdNumberMap,
+                playerNumberIdMap = gameDomain.details.playerNumberIdMap,
                 playerOrder = gameDomain.details.playerOrder,
                 currentTurn = gameDomain.details.currentTurn,
                 prevTurn = gameDomain.details.prevTurn,

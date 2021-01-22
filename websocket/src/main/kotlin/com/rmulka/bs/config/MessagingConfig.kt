@@ -15,6 +15,6 @@ class MessagingConfig : WebSocketMessageBrokerConfigurer {
     }
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
-        registry.addEndpoint("/socket").setAllowedOrigins("http://localhost:3000").withSockJS()
+        registry.addEndpoint("/socket").setAllowedOrigins("http://localhost:3000", "https://bs-game.herokuapp.com").withSockJS()
     }
 }

@@ -5,6 +5,7 @@ import java.util.UUID
 
 data class GameDetails(
         val playerIdNumberMap: Map<UUID, Int> = emptyMap(),
+        val playerNumberIdMap: Map<Int, UUID> = emptyMap(),
         val playerOrder: Map<Int, Int> = emptyMap(),
         val currentTurn: Int? = null,
         val prevTurn: Int? = null,
