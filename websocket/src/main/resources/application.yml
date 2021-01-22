@@ -1,12 +1,3 @@
-server:
-  port : 8081
-
 spring:
-  datasource:
-    #    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5433/bs
-    username: user
-    password: pass
-    driver-class-name: org.postgresql.Driver
-  flyway:
-    enabled: false
+  profiles:
+    active: local
