@@ -1,0 +1,12 @@
+spring:
+  flyway:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health,info,metrics'
+
+server:
+  port: ${PORT}

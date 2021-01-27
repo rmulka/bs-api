@@ -1,0 +1,88 @@
+plugins {
+    id 'nu.studer.jooq' version '5.2'
+    id "org.flywaydb.flyway" version "$flywayVersion"
+    id "java-library"
+}
+
+group = "com.rmulka"
+version = "0.0.1-SNAPSHOT"
+
+java.sourceCompatibility = JavaVersion.VERSION_11
+
+jar.enabled = true
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    maven { url = uri("https://repo.spring.io/snapshot") }
+}
+
+dependencies {
+    api "org.flywaydb:flyway-core:$flywayVersion"
+    implementation "org.postgresql:postgresql:$postgresDriverVersion"
+    implementation "org.jooq:jooq:$jooqVersion"
+
+    jooqGenerator "org.postgresql:postgresql:$postgresDriverVersion"
+}
+
+jooq {
+    configurations {
+        main {
+            generateSchemaSourceOnCompilation = false
+            generationTool {
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = 'jdbc:postgresql://localhost:5433/bs'
+                    username = 'user'
+                    password = 'pass'
+                }
+                generator {
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = 'bs'
+                        recordVersionFields = 'rec_version'
+                    }
+                    generate {
+                        relations = true
+                        deprecated = false
+                        records = true
+                        pojos = true
+                        pojosEqualsAndHashCode = true
+                        daos = true
+                        fluentSetters = true
+                        javaTimeTypes = true
+                    }
+                    target {
+                        packageName = 'com.rmulka.bs.jooq.generated'
+                        directory = 'src/main/java/'
+                    }
+                }
+            }
+        }
+    }
+}
+
+flyway {
+    url = 'jdbc:postgresql://localhost:5433/bs'
+    user = 'user'
+    password = 'pass'
+    locations = ['classpath:db/migration']
+}
+
+sourceCompatibility = 11
+compileKotlin {
+    kotlinOptions.jvmTarget = "11"
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "11"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+project.tasks.getByName('generateJooq').dependsOn rootProject.composeUp
+project.tasks.getByName('generateJooq').dependsOn flywayMigrate
+project.tasks.getByName('generateJooq').finalizedBy rootProject.composeDownForced

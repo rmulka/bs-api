@@ -1,0 +1,69 @@
+plugins {
+    id("org.springframework.boot") version "$springbootVersion"
+    id("io.spring.dependency-management") version "1.0.10.RELEASE"
+    id "org.jetbrains.kotlin.plugin.spring" version "$kotlinVersion"
+    id "org.flywaydb.flyway" version "$flywayVersion"
+    id 'application'
+}
+
+group = "com.rmulka"
+version = "0.0.1-SNAPSHOT"
+
+java.sourceCompatibility = JavaVersion.VERSION_11
+
+apply plugin: "application"
+
+mainClassName = "com.rmulka.bs.BsApplicationKt"
+
+repositories {
+    mavenCentral()
+    maven { url = uri("https://repo.spring.io/snapshot") }
+}
+
+dependencies {
+    implementation project(":database")
+    implementation project(":domain")
+
+    implementation "org.springframework.boot:spring-boot-starter-actuator:${springbootVersion}"
+    implementation("org.springframework.boot:spring-boot-starter-webflux:$springbootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc:$springbootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-validation:$springbootVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.wavefront:wavefront-spring-boot-starter:$wavefrontVersion")
+    implementation("io.github.microutils:kotlin-logging:$loggerVersion")
+
+    implementation "javax.validation:validation-api:2.0.1.Final"
+
+//    implementation 'com.zaxxer:HikariCP:3.4.5'
+    implementation "org.postgresql:postgresql:$postgresDriverVersion"
+
+    implementation "org.jooq:jooq:$jooqVersion"
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.projectreactor:reactor-test")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.wavefront:wavefront-spring-boot-bom:$wavefrontVersion"
+    }
+}
+
+flyway {
+    url = 'jdbc:postgresql://localhost:5433/bs'
+    user = 'user'
+    password = 'pass'
+    locations = ['classpath:db/migration']
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "11"
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "11"
+}
+
+test {
+    useJUnitPlatform()
+}
