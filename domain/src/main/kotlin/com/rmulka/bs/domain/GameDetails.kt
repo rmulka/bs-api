@@ -1,6 +1,7 @@
 package com.rmulka.bs.domain
 
 import com.rmulka.bs.game.Card
+import java.time.OffsetDateTime
 import java.util.UUID
 
 data class GameDetails(
@@ -20,5 +21,6 @@ data class GameDetails(
         val bsCalled: Boolean = false,
         val isBs: Boolean = false,
         val bsPlayerId: UUID? = null,
-        val playerCalledBsId: UUID? = null
+        val playerCalledBsId: UUID? = null,
+        val timerStart: OffsetDateTime? = null
 )

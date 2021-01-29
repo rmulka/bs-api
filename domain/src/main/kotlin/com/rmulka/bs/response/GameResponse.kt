@@ -3,7 +3,9 @@ package com.rmulka.bs.response
 import com.rmulka.bs.jooq.generated.tables.pojos.Game
 import com.rmulka.bs.domain.GameDetails
 import com.rmulka.bs.domain.Player
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -16,7 +18,10 @@ data class GameResponse(
         val isActive: Boolean,
         val creatorId: UUID,
         val players: List<Player>,
-        val timerStart: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        val timerStart: String = DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(ZoneOffset.UTC)
+                .format(Instant.now())
 ) {
     constructor(game: Game, details: GameDetails, players: List<Player>): this(
             id = game.id,
@@ -27,6 +32,9 @@ data class GameResponse(
             isActive = game.isActive,
             creatorId = game.creatorId,
             players = players,
-            timerStart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            timerStart = DateTimeFormatter
+                    .ofPattern("yyyy-MM-dd HH:mm:ss")
+                    .withZone(ZoneOffset.UTC)
+                    .format(Instant.now())
     )
 }

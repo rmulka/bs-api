@@ -20,6 +20,9 @@ import mu.KotlinLogging
 import org.jooq.JSONB
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 @Service
@@ -90,7 +93,8 @@ class GameService(private val gameDao: GameDao,
                 bsCalled = false,
                 isBs = false,
                 bsPlayerId = null,
-                playerCalledBsId = null
+                playerCalledBsId = null,
+                timerStart = OffsetDateTime.now()
         )
 
         return gameDao.startGame(gameId, JSONB.jsonb(objectMapper.writeValueAsString(gameDetails))).let { dbGame ->
@@ -138,7 +142,8 @@ class GameService(private val gameDao: GameDao,
                 bsCalled = false,
                 isBs = false,
                 bsPlayerId = null,
-                playerCalledBsId = null
+                playerCalledBsId = null,
+                timerStart = OffsetDateTime.now()
         )
 
         return gameDao.updateGameDetails(game, JSONB.jsonb(objectMapper.writeValueAsString(newGameDetails))).let { dbGame ->
@@ -180,7 +185,8 @@ class GameService(private val gameDao: GameDao,
                 bsCalled = false,
                 isBs = false,
                 bsPlayerId = null,
-                playerCalledBsId = null
+                playerCalledBsId = null,
+                timerStart = OffsetDateTime.now()
         )
 
         return gameDao.updateGameDetails(game, JSONB.jsonb(objectMapper.writeValueAsString(newGameDetails))).let { dbGame ->
@@ -233,7 +239,8 @@ class GameService(private val gameDao: GameDao,
                 bsCalled = true,
                 isBs = isBs,
                 bsPlayerId = playerGettingBsId,
-                playerCalledBsId = playerId
+                playerCalledBsId = playerId,
+                timerStart = gameDomain.details.timerStart
         )
 
         return gameDao.updateGameDetails(game, JSONB.jsonb(objectMapper.writeValueAsString(newGameDetails))).let { dbGame ->
