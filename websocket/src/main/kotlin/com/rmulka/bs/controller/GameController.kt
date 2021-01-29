@@ -38,6 +38,13 @@ class GameController(private val gameService: GameService) {
             request: BsRequest
     ): GameResponse = gameService.processBs(gameId, request.playerId)
 
+    @MessageMapping("/game/miss/{gameId}/player/{playerId}")
+    @SendTo("/topic/game/{gameId}")
+    fun processMissedTurn(
+            @DestinationVariable gameId: UUID,
+            @DestinationVariable playerId: UUID
+    ): GameResponse = gameService.processMissedTurn(gameId, playerId)
+
     @MessageMapping("/chat/{gameId}")
     @SendTo("/topic/chat/{gameId}")
     fun processChatMessage(

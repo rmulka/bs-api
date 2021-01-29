@@ -143,7 +143,49 @@ class GameService(private val gameDao: GameDao,
 
         return gameDao.updateGameDetails(game, JSONB.jsonb(objectMapper.writeValueAsString(newGameDetails))).let { dbGame ->
             GameResponse(dbGame, converterUtil.toGameDetails(dbGame.details), players).also {
-                logger.info("Game $gameId updated...Player ${playerTurn.playerId} played ${playerTurn.playedCards.size} $lastPlayedRank's")
+                logger.info("Game $gameId updated...Player ${playerTurn.playerId} played ${playerTurn.playedCards.size} $lastPlayedRank(s)")
+            }
+        }
+    }
+
+    @Transactional
+    fun processMissedTurn(gameId: UUID, playerId: UUID): GameResponse {
+        val game = gameDao.fetchGame(gameId)
+        val gameDomain = converterUtil.toGameDomain(game)
+        val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
+
+        val newPlayerCards = gameDomain.details.playerCards.entries.fold(mapOf<UUID, List<Card>>()) { acc, entry ->
+            when {
+                entry.key != playerId -> acc.plus(entry.toPair())
+                else -> acc.plus(Pair(entry.key, (entry.value + gameDomain.details.pile).toList()))
+            }
+        }
+
+        val lastPlayedRank = gameDomain.details.currentRank ?: throw ResourceNotFoundException("Game $gameId current rank not found")
+
+        val newGameDetails = GameDetails(
+                playerIdNumberMap = gameDomain.details.playerIdNumberMap,
+                playerNumberIdMap = gameDomain.details.playerNumberIdMap,
+                playerOrder = gameDomain.details.playerOrder,
+                currentTurn = gameDomain.details.currentTurn?.let { currentTurn -> currentTurn % game.numPlayers + 1 },
+                prevTurn = gameDomain.details.currentTurn,
+                playerCards = newPlayerCards,
+                pile = listOf(),
+                isWinner = false,
+                winnerId = null,
+                numCardsLastPlayed = 0,
+                lastPlayedRank = lastPlayedRank,
+                currentRank = (lastPlayedRank % 13) + 1,
+                firstTurn = false,
+                bsCalled = false,
+                isBs = false,
+                bsPlayerId = null,
+                playerCalledBsId = null
+        )
+
+        return gameDao.updateGameDetails(game, JSONB.jsonb(objectMapper.writeValueAsString(newGameDetails))).let { dbGame ->
+            GameResponse(dbGame, converterUtil.toGameDetails(dbGame.details), players).also {
+                logger.info("Game $gameId updated...Player $playerId missed their turn. Picked up ${gameDomain.details.pile.size} cards")
             }
         }
     }
