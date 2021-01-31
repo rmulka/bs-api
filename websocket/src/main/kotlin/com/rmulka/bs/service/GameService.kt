@@ -109,7 +109,7 @@ class GameService(private val gameDao: GameDao,
         val players = playerGameDao.fetchPlayersByGameId(gameId).toPlayerDomain()
 
         val prevPlayerUuid = gameDomain.details.playerNumberIdMap[gameDomain.details.playerOrder[gameDomain.details.prevTurn]]
-        val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, prevPlayerUuid, players, gameId)
+        val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, prevPlayerUuid, players, gameId, false)
 
         val playedCards = playerTurn.playedCards.toSet()
         val oldCards = gameDomain.details.playerCards[playerTurn.playerId]?.toSet()
@@ -208,11 +208,11 @@ class GameService(private val gameDao: GameDao,
 
         val playerGettingBsId = gameDomain.details.playerNumberIdMap[gameDomain.details.playerOrder[gameDomain.details.prevTurn]]
 
-        val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, playerGettingBsId, players, gameId)
-
         val lastCardsPlayed = gameDomain.details.pile.takeLast(gameDomain.details.numCardsLastPlayed)
 
         val isBs = lastCardsPlayed.any { card -> card.rank != gameDomain.details.lastPlayedRank }
+
+        val (isWinner, winnerId) = checkForWinner(gameDomain.details.playerCards, playerGettingBsId, players, gameId, isBs)
 
         val newPlayerCards = gameDomain.details.playerCards.entries.fold(mapOf<UUID, List<Card>>()) { acc, entry ->
             when {
@@ -263,8 +263,9 @@ class GameService(private val gameDao: GameDao,
             playerCards: Map<UUID, List<Card>>,
             playerId: UUID?,
             players: List<Player>,
-            gameId: UUID
-    ): Pair<Boolean, UUID?> = (playerCards[playerId]?.size == 0).let { isWinner ->
+            gameId: UUID,
+            isBs: Boolean
+    ): Pair<Boolean, UUID?> = (!isBs && playerCards[playerId]?.size == 0).let { isWinner ->
         val winnerId = if (isWinner) players.find { it.id == playerId }?.id.also {
             logger.info("Game $gameId: player $playerId is the winner")
         } else null
